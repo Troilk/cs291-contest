@@ -29,7 +29,7 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 		var v = y / segmentsY;
 		var i_radius = v * ( innerRadiusBottom - innerRadiusTop ) + innerRadiusTop;
 		var o_radius = v * ( outerRadiusBottom - outerRadiusTop ) + outerRadiusTop;
-		if(modifier !== undefined)
+		if(modifier)
 		{
 			vm = modifier(v);
 			i_radius *= vm;
@@ -62,7 +62,7 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 	if(!openEnded && endSegments > 1)
 	{
-		var t_heightDelta = outerRadiusTop - innerRadiusTop;//i_heightHalf - o_heightHalf;
+		var t_heightDelta = outerRadiusTop - innerRadiusTop + innerHeight - outerHeight;
 		var b_heightDelta = outerRadiusBottom - innerRadiusBottom;
 
 		for(y = 1; y < endSegments; ++y)
@@ -73,12 +73,8 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 			var t_radius = v * ( outerRadiusTop - innerRadiusTop ) + innerRadiusTop;
 			var b_radius = v * ( outerRadiusBottom - innerRadiusBottom ) + innerRadiusBottom;
 
-			if(modifier !== undefined)
-			{
-				vm = modifier(v);
-				t_radius *= vm;
-				b_radius *= vm;
-			}
+			v -= 0.5;
+			v = -(v * v) + 0.25;
 
 			for ( x = 0; x <= segmentsX; ++x ) {
 
