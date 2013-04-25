@@ -62,8 +62,11 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 	if(!openEnded && endSegments > 1)
 	{
-		var t_heightDelta = outerRadiusTop - innerRadiusTop + innerHeight - outerHeight;
-		var b_heightDelta = outerRadiusBottom - innerRadiusBottom;
+		//var t_heightDelta = outerRadiusTop - innerRadiusTop + innerHeight - outerHeight;
+		//var b_heightDelta = outerRadiusBottom - innerRadiusBottom;
+		var offset =0.5;//(0.5 - (innerHeight - outerHeight) / Math.max(innerHeight, outerHeight));
+		var top = Math.max(i_heightHalf, o_heightHalf) + (outerRadiusTop - innerRadiusTop) * 0.4;//offset * offset;
+		//var top = (i_heightHalf - o_heightHalf) * 0.5 + o_heightHalf + (outerRadiusTop - innerRadiusTop) * 0.4;
 
 		for(y = 1; y < endSegments; ++y)
 		{
@@ -73,8 +76,11 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 			var t_radius = v * ( outerRadiusTop - innerRadiusTop ) + innerRadiusTop;
 			var b_radius = v * ( outerRadiusBottom - innerRadiusBottom ) + innerRadiusBottom;
 
-			v -= 0.5;
-			v = -(v * v) + 0.25;
+			var vo = v - offset;
+			//v -= offset;
+			//v -= 0.5;
+			vo = -(vo * vo) + (offset * offset);
+			var yPos = v > 0.5 ? (vo * 4 * (top - o_heightHalf) + o_heightHalf) : (vo * 4 * (top - i_heightHalf) + i_heightHalf);
 
 			for ( x = 0; x <= segmentsX; ++x ) {
 
@@ -82,12 +88,14 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 				var t_vertex = new THREE.Vector3();
 				t_vertex.x = t_radius * Math.sin( u * rangeAngle );
-				t_vertex.y = v * t_heightDelta + o_heightHalf;
+				//t_vertex.y = v * t_heightDelta + o_heightHalf;
+				t_vertex.y = yPos;
 				t_vertex.z = t_radius * Math.cos( u * rangeAngle );
 
 				var b_vertex = new THREE.Vector3();
 				b_vertex.x = b_radius * Math.sin( u * rangeAngle );
-				b_vertex.y = - v * b_heightDelta - o_heightHalf;
+				//b_vertex.y = - v * b_heightDelta - o_heightHalf;
+				b_vertex.y = -yPos;
 				b_vertex.z = b_radius * Math.cos( u * rangeAngle );
 
 				this.vertices.push( t_vertex );
