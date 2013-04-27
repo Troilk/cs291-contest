@@ -122,18 +122,27 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 	//generating side faces
 	// var i_tanTheta = ( innerRadiusBottom - innerRadiusTop ) / innerHeight;
 	// var o_tanTheta = ( outerRadiusBottom - outerRadiusTop ) / outerHeight;
-	var i_tanTheta, o_tanTheta;
+	var i_tanTheta, o_tanTheta, i_prevTan, o_prevTan;
 	var i_na, i_nb, o_na, o_nb, prevNormal = null;
 	var i_heightDelta = segmentsY / innerHeight, o_heightDelta = segmentsY / outerHeight;
 
 	for ( x = 0; x < segmentsX; ++x ) 
 	{
-
+		i_prevTan = o_prevTan = undefined;
 		for ( y = 0; y < segmentsY; ++y ) 
 		{
 
-			i_tanTheta = (vertices[ y ].i_rad - vertices[ y + 1 ].i_rad) * i_heightDelta;
-			o_tanTheta = (vertices[ y ].i_rad - vertices[ y + 1 ].i_rad) * o_heightDelta;
+			i_tanTheta = (vertices[ y + 1 ].i_rad - vertices[ y ].i_rad) * i_heightDelta;
+			o_tanTheta = (vertices[ y + 1 ].i_rad - vertices[ y ].i_rad) * o_heightDelta;
+
+			if(i_prevTan)
+			{
+				i_tanTheta = Math.tan((Math.atan(i_tanTheta) + Math.atan(i_prevTan)) * 0.5);
+				o_tanTheta = Math.tan((Math.atan(o_tanTheta) + Math.atan(o_prevTan)) * 0.5);
+			}
+
+			i_prevTan = i_tanTheta;
+			o_prevTan = o_tanTheta;
 
 			//if ( innerRadiusTop !== 0 ) {
 
@@ -142,8 +151,8 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 			// } else {
 
-			// 	i_na = this.vertices[ vertices[ 1 ].inner[ x ] ].clone();
-			// 	i_nb = this.vertices[ vertices[ 1 ].inner[ x + 1 ] ].clone();
+			// 	i_na = this.vertices[ vertices[ y ].inner[ x ] ].clone();
+			// 	i_nb = this.vertices[ vertices[ y ].inner[ x + 1 ] ].clone();
 
 			// }
 
@@ -154,8 +163,8 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 			// } else {
 
-			// 	o_na = this.vertices[ vertices[ 1 ].outer[ x ] ].clone();
-			// 	o_nb = this.vertices[ vertices[ 1 ].outer[ x + 1 ] ].clone();
+			// 	o_na = this.vertices[ vertices[ y ].outer[ x ] ].clone();
+			// 	o_nb = this.vertices[ vertices[ y ].outer[ x + 1 ] ].clone();
 
 			// }
 
@@ -164,16 +173,24 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 			o_na.setY( Math.sqrt( o_na.x * o_na.x + o_na.z * o_na.z ) * o_tanTheta ).normalize();
 			o_nb.setY( Math.sqrt( o_nb.x * o_nb.x + o_nb.z * o_nb.z ) * o_tanTheta ).normalize();
 
-			if(modifier && prevNormal !== null)
+			if(y > 0)
 			{
-				i_na.setY( (i_na.y + prevNormal.ia[x]) * 0.5 ).normalize();
-				i_nb.setY( (i_nb.y + prevNormal.ib[x]) * 0.5 ).normalize();
-				o_na.setY( (o_na.y + prevNormal.oa[x]) * 0.5 ).normalize();
-				o_nb.setY( (o_nb.y + prevNormal.ob[x]) * 0.5 ).normalize();
+				this.faces[this.faces.length - 2].vertexNormals[2] = i_na.clone();
+				this.faces[this.faces.length - 2].vertexNormals[1] = i_nb.clone();
+
+				this.faces[this.faces.length - 1].vertexNormals[1] = o_na.clone();
+				this.faces[this.faces.length - 1].vertexNormals[2] = o_nb.clone();
 			}
 
-			prevNormal = { ia: [], ib: [], oa: [], ob: [] };
+			// if(modifier && prevNormal !== null)
+			// {
+			// 	i_na.setY( (i_na.y + prevNormal.ia[x]) * 0.5 ).normalize();
+			// 	i_nb.setY( (i_nb.y + prevNormal.ib[x]) * 0.5 ).normalize();
+			// 	o_na.setY( (o_na.y + prevNormal.oa[x]) * 0.5 ).normalize();
+			// 	o_nb.setY( (o_nb.y + prevNormal.ob[x]) * 0.5 ).normalize();
+			// }
 
+			// prevNormal = {} ;
 				//i_na, i_nb, o_na, o_nb make them middle between current state and previous normal (avarage and normalize)
 
 			var i_v1 = vertices[ y ].inner[ x + 1 ];

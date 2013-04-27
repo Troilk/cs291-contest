@@ -11,7 +11,7 @@ var clock = new THREE.Clock();
 var irt = 80.0, irb = 80.0, ort = 100.0, orb = 100.0, innerHeight = 400.0, outerHeight = 400.0;
 var rs = 32, hs = 16, oe = false, es = 16, ra = 360, modif = 'Math.exp(Math.cos(x * 5))';
 //display parameters
-var wireframe = false, tubeColor = 0x4aa9be;
+var wireframe = false, tubeColor = 0x4aa9be, vertexNormals = false, faceNormals = false;
 
 function init()
 {
@@ -56,6 +56,20 @@ function createTube()
 	var tube = new THREE.Mesh(geometry, material);
 	tube.position.y = Math.max(innerHeight, outerHeight) * 0.5;
 	scene.add(tube);
+
+	if(vertexNormals)
+	{
+		var geometryNormals = createNormals(geometry, 5, 0xCC0000);
+		geometryNormals.position.y = tube.position.y;
+		scene.add(geometryNormals);
+	}
+
+	if(faceNormals)
+	{
+		var geometryNormals = createNormals(geometry, 5, 0xCC0000, true);
+		geometryNormals.position.y = tube.position.y;
+		scene.add(geometryNormals);
+	}
 }
 
 function fillScene() 
@@ -70,10 +84,10 @@ function fillScene()
 	light.position.set( 200, 400, 500 );
 	
 	var light2 = new THREE.DirectionalLight( 0xffffff, 1.0 );
-	light2.position.set( -500, 250, -200 );
+	light2.position.set( -500, 400, -200 );
 
 	scene.add(ambientLight);
-	scene.add(light);
+	//scene.add(light);
 	scene.add(light2);
 }
 
@@ -107,7 +121,8 @@ function render()
 		|| effectController.newAxes !== axes || effectController.innerRadiusTop !== irt || effectController.innerRadiusBottom !== irb || effectController.outerRadiusTop !== ort
 		|| effectController.outerRadiusBottom !== orb || effectController.tubeInnerHeight !== innerHeight || effectController.tubeOuterHeight !== outerHeight
 		|| effectController.radialSegments !== rs || effectController.heightSegments !== hs || effectController.openEnded !== oe || effectController.endSegments !== es
-		|| effectController.rangeAngle !== ra || effectController.wire !== wireframe || effectController.tubeCol !== tubeColor || effectController.modifier !== modif)
+		|| effectController.rangeAngle !== ra || effectController.wire !== wireframe || effectController.faceNorms !== faceNormals || effectController.vertexNorms !== vertexNormals 
+		|| effectController.tubeCol !== tubeColor || effectController.modifier !== modif)
 	{
 		gridX = effectController.newGridX;
 		gridY = effectController.newGridY;
@@ -129,6 +144,8 @@ function render()
 		modif = effectController.modifier;
 
 		wireframe = effectController.wire;
+		vertexNormals = effectController.vertexNorms;
+		faceNormals = effectController.faceNorms;
 		tubeColor = effectController.tubeCol;
 
 		axes = effectController.newAxes;
@@ -167,6 +184,8 @@ function setupGui()
 
 		//display parameters
 		wire: wireframe,
+		faceNorms: faceNormals,
+		vertexNorms: vertexNormals,
 		tubeCol: tubeColor
 	};
 
@@ -197,6 +216,8 @@ function setupGui()
 
 	var dparams = gui.addFolder("Display parameters");
 	dparams.add( effectController, "wire").name("Wireframe");
+	dparams.add( effectController, "vertexNorms").name("Display vertex normals");
+	dparams.add( effectController, "faceNorms").name("Display face normals");
 	dparams.addColor( effectController, "tubeCol").name("Tube color");
 
 	tp.open();
