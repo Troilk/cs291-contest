@@ -9,7 +9,7 @@ var clock = new THREE.Clock();
 
 //tube parameters
 var irt = 80.0, irb = 80.0, ort = 100.0, orb = 100.0, innerHeight = 400.0, outerHeight = 400.0;
-var rs = 32, hs = 16, oe = false, es = 16, ra = 360, modif = '1';//'Math.exp(Math.cos(x * 5))';
+var rs = 32, hs = 16, oe = false, es = 16, ra = 360, modif = 'Math.exp(Math.cos(x * 5))';
 //display parameters
 var wireframe = false, tubeColor = 0x4aa9be;
 

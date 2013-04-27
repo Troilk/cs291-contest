@@ -60,6 +60,16 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 		vertices.push( verticesRow );
 	}
 
+	if(modifier)
+	{
+		vm = modifier(1);
+		outerRadiusBottom *= vm;
+		innerRadiusBottom *= vm;
+		vm = modifier(0);
+		outerRadiusTop *= vm;
+		innerRadiusTop *= vm;
+	}
+
 	if(!openEnded && endSegments > 1)
 	{
 		//var t_heightDelta = outerRadiusTop - innerRadiusTop + innerHeight - outerHeight;
