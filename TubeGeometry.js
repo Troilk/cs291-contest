@@ -24,8 +24,6 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 	//generating vertices
 	for ( y = 0; y <= segmentsY; ++y ) { 
 
-		var verticesRow = { inner: [], outer: [] };
-
 		var v = y / segmentsY;
 		var i_radius = v * ( innerRadiusBottom - innerRadiusTop ) + innerRadiusTop;
 		var o_radius = v * ( outerRadiusBottom - outerRadiusTop ) + outerRadiusTop;
@@ -35,6 +33,8 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 			i_radius *= vm;
 			o_radius *= vm;
 		}
+
+		var verticesRow = { inner: [], outer: [], i_rad: i_radius, o_rad: o_radius };
 
 		for ( x = 0; x <= segmentsX; ++x ) {
 
@@ -120,43 +120,62 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 	}
 
 	//generating side faces
-	var i_tanTheta = ( innerRadiusBottom - innerRadiusTop ) / innerHeight;
-	var o_tanTheta = ( outerRadiusBottom - outerRadiusTop ) / outerHeight;
-	var i_na, i_nb, o_na, o_nb;
+	// var i_tanTheta = ( innerRadiusBottom - innerRadiusTop ) / innerHeight;
+	// var o_tanTheta = ( outerRadiusBottom - outerRadiusTop ) / outerHeight;
+	var i_tanTheta, o_tanTheta;
+	var i_na, i_nb, o_na, o_nb, prevNormal = null;
+	var i_heightDelta = segmentsY / innerHeight, o_heightDelta = segmentsY / outerHeight;
 
-	for ( x = 0; x < segmentsX; ++x ) {
-
-		if ( innerRadiusTop !== 0 ) {
-
-			i_na = this.vertices[ vertices[ 0 ].inner[ x ] ].clone();
-			i_nb = this.vertices[ vertices[ 0 ].inner[ x + 1 ] ].clone();
-
-		} else {
-
-			i_na = this.vertices[ vertices[ 1 ].inner[ x ] ].clone();
-			i_nb = this.vertices[ vertices[ 1 ].inner[ x + 1 ] ].clone();
-
-		}
-
-		if ( outerRadiusTop !== 0 ) {
-
-			o_na = this.vertices[ vertices[ 0 ].outer[ x ] ].clone();
-			o_nb = this.vertices[ vertices[ 0 ].outer[ x + 1 ] ].clone();
-
-		} else {
-
-			o_na = this.vertices[ vertices[ 1 ].outer[ x ] ].clone();
-			o_nb = this.vertices[ vertices[ 1 ].outer[ x + 1 ] ].clone();
-
-		}
-
-		i_na.setY( Math.sqrt( i_na.x * i_na.x + i_na.z * i_na.z ) * i_tanTheta ).normalize().negate();
-		i_nb.setY( Math.sqrt( i_nb.x * i_nb.x + i_nb.z * i_nb.z ) * i_tanTheta ).normalize().negate();
-		o_na.setY( Math.sqrt( o_na.x * o_na.x + o_na.z * o_na.z ) * o_tanTheta ).normalize();
-		o_nb.setY( Math.sqrt( o_nb.x * o_nb.x + o_nb.z * o_nb.z ) * o_tanTheta ).normalize();
+	for ( x = 0; x < segmentsX; ++x ) 
+	{
 
 		for ( y = 0; y < segmentsY; ++y ) 
 		{
+
+			i_tanTheta = (vertices[ y ].i_rad - vertices[ y + 1 ].i_rad) * i_heightDelta;
+			o_tanTheta = (vertices[ y ].i_rad - vertices[ y + 1 ].i_rad) * o_heightDelta;
+
+			//if ( innerRadiusTop !== 0 ) {
+
+				i_na = this.vertices[ vertices[ y ].inner[ x ] ].clone();
+				i_nb = this.vertices[ vertices[ y ].inner[ x + 1 ] ].clone();
+
+			// } else {
+
+			// 	i_na = this.vertices[ vertices[ 1 ].inner[ x ] ].clone();
+			// 	i_nb = this.vertices[ vertices[ 1 ].inner[ x + 1 ] ].clone();
+
+			// }
+
+			//if ( outerRadiusTop !== 0 ) {
+
+				o_na = this.vertices[ vertices[ y ].outer[ x ] ].clone();
+				o_nb = this.vertices[ vertices[ y ].outer[ x + 1 ] ].clone();
+
+			// } else {
+
+			// 	o_na = this.vertices[ vertices[ 1 ].outer[ x ] ].clone();
+			// 	o_nb = this.vertices[ vertices[ 1 ].outer[ x + 1 ] ].clone();
+
+			// }
+
+			i_na.setY( Math.sqrt( i_na.x * i_na.x + i_na.z * i_na.z ) * i_tanTheta ).normalize().negate();
+			i_nb.setY( Math.sqrt( i_nb.x * i_nb.x + i_nb.z * i_nb.z ) * i_tanTheta ).normalize().negate();
+			o_na.setY( Math.sqrt( o_na.x * o_na.x + o_na.z * o_na.z ) * o_tanTheta ).normalize();
+			o_nb.setY( Math.sqrt( o_nb.x * o_nb.x + o_nb.z * o_nb.z ) * o_tanTheta ).normalize();
+
+			if(modifier && prevNormal !== null)
+			{
+				i_na.setY( (i_na.y + prevNormal.ia[x]) * 0.5 ).normalize();
+				i_nb.setY( (i_nb.y + prevNormal.ib[x]) * 0.5 ).normalize();
+				o_na.setY( (o_na.y + prevNormal.oa[x]) * 0.5 ).normalize();
+				o_nb.setY( (o_nb.y + prevNormal.ob[x]) * 0.5 ).normalize();
+			}
+
+			prevNormal = { ia: [], ib: [], oa: [], ob: [] };
+
+				//i_na, i_nb, o_na, o_nb make them middle between current state and previous normal (avarage and normalize)
+
 			var i_v1 = vertices[ y ].inner[ x + 1 ];
 			var i_v2 = vertices[ y + 1 ].inner[ x + 1];
 			var i_v3 = vertices[ y + 1 ].inner[ x ];
