@@ -122,7 +122,7 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 	//generating side faces
 	// var i_tanTheta = ( innerRadiusBottom - innerRadiusTop ) / innerHeight;
 	// var o_tanTheta = ( outerRadiusBottom - outerRadiusTop ) / outerHeight;
-	var i_tanTheta, o_tanTheta, i_prevTan, o_prevTan;
+	var i_tanTheta, o_tanTheta, i_prevTan, o_prevTan, rad_delta;
 	var i_na, i_nb, o_na, o_nb, prevNormal = null;
 	var i_heightDelta = segmentsY / innerHeight, o_heightDelta = segmentsY / outerHeight;
 
@@ -133,7 +133,7 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 		{
 
 			i_tanTheta = (vertices[ y + 1 ].i_rad - vertices[ y ].i_rad) * i_heightDelta;
-			o_tanTheta = (vertices[ y + 1 ].i_rad - vertices[ y ].i_rad) * o_heightDelta;
+			o_tanTheta = (vertices[ y + 1 ].o_rad - vertices[ y ].o_rad) * o_heightDelta;
 
 			if(i_prevTan)
 			{

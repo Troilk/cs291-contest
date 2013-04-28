@@ -52,7 +52,7 @@ function createTube()
 
 	}catch(err){ m_func = undefined; }
 	var geometry = new TubeGeometry(irt, irb, ort, orb, innerHeight, outerHeight, rs, hs, oe, es, toRadians(ra), m_func );
-	var material = new THREE.MeshPhongMaterial({color: tubeColor, wireframe: wireframe});
+	var material = new THREE.MeshPhongMaterial({color: tubeColor, wireframe: wireframe, specular: 0xffffff, shininess: 100});
 	var tube = new THREE.Mesh(geometry, material);
 	tube.position.y = Math.max(innerHeight, outerHeight) * 0.5;
 	scene.add(tube);
