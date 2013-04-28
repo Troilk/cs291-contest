@@ -120,7 +120,8 @@ function render()
 	if ( effectController.newGridX !== gridX || effectController.newGridY !== gridY || effectController.newGridZ !== gridZ || effectController.newGround !== ground 
 		|| effectController.newAxes !== axes || effectController.innerRadiusTop !== irt || effectController.innerRadiusBottom !== irb || effectController.outerRadiusTop !== ort
 		|| effectController.outerRadiusBottom !== orb || effectController.tubeInnerHeight !== innerHeight || effectController.tubeOuterHeight !== outerHeight
-		|| effectController.radialSegments !== rs || effectController.heightSegments !== hs || effectController.openEnded !== oe || effectController.endSegments !== es
+		|| Math.floor(effectController.radialSegments) !== rs || Math.floor(effectController.heightSegments) !== hs || effectController.openEnded !== oe
+		|| Math.floor(effectController.endSegments) !== es
 		|| effectController.rangeAngle !== ra || effectController.wire !== wireframe || effectController.faceNorms !== faceNormals || effectController.vertexNorms !== vertexNormals 
 		|| effectController.tubeCol !== tubeColor || effectController.modifier !== modif)
 	{
@@ -135,10 +136,10 @@ function render()
 		orb = effectController.outerRadiusBottom;
 		innerHeight = effectController.tubeInnerHeight;
 		outerHeight = effectController.tubeOuterHeight;
-		rs = effectController.radialSegments;
-		hs = effectController.heightSegments;
+		rs = Math.floor(effectController.radialSegments);
+		hs = Math.floor(effectController.heightSegments);
 		oe = effectController.openEnded;
-		es = effectController.endSegments;
+		es = Math.floor(effectController.endSegments);
 		ra = effectController.rangeAngle;
 
 		modif = effectController.modifier;
