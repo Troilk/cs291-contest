@@ -9,7 +9,8 @@ Features:
 
 -rounded tube ends
 
--radius of the tube can be modified with a function. As you can see in the screenshots it allows to generate objects like vases, goblets and so on
-adjustable outer/inner heights and radiuses
+-radius of the tube can be modified with a function.
+
+-adjustable range angle
 
 I also coded a function to display vertex and face normals of generated geometry (they can be turned on in “Display parameters” tab of the demo).
