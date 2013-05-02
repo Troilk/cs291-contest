@@ -10,7 +10,7 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 	innerHeight = innerHeight !== undefined ? innerHeight : 100;
 	outerHeight = outerHeight !== undefined ? outerHeight : 100;
 	openEnded = openEnded !== undefined ? openEnded : false;
-	endSegments = endSegments !== undefined ? endSegments : 1;
+	endSegments = endSegments !== undefined ? (endSegments !== 1 && endSegments % 2 === 1 ? endSegments + 1 : endSegments) : 1;
 	rangeAngle = rangeAngle !== undefined ? rangeAngle : 360;
 
 	var i_heightHalf = innerHeight * 0.5;
@@ -84,7 +84,8 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 			var vo = v - offset;
 			vo = -(vo * vo) + (offset * offset);
-			var yPos = v > 0.5 ? (vo * 4 * (top - o_heightHalf) + o_heightHalf) : (vo * 4 * (top - i_heightHalf) + i_heightHalf);
+			var yPos = v > 0.5 ? (vo * 4 * (top - o_heightHalf) + o_heightHalf) :
+				(vo * 4 * (top - i_heightHalf) + i_heightHalf);
 			var verticesRow = { top: [], bottom: [],  t_rad: t_radius, b_rad: b_radius, height: yPos };
 
 			for ( x = 0; x <= segmentsX; ++x ) {
@@ -205,23 +206,28 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 				for(i = y + 1; i < y + endSegments - 1; ++i)
 				{
-					tan = (vertices[ i + 1 ].t_rad - vertices[ i ].t_rad) / (vertices[ i ].height - vertices[ i + 1 ].height);
+					tan = (vertices[ i + 1 ].t_rad - vertices[ i ].t_rad) /
+						(vertices[ i ].height - vertices[ i + 1 ].height);
 					tans.push(Math.tan((Math.atan(tan) + Math.atan(prevTan)) * 0.5));
 					prevTan = tan;
 				}
 				tans.push(Math.tan((Math.atan(-o_firstTan) + Math.atan(prevTan)) * 0.5));
 				tans.push(o_firstTan);
 
-				connectCircles(vertices[y + 1].top, vertices[0].inner, this.faces, this.vertices, tans[1], tans[0], 1);
+				connectCircles(vertices[y + 1].top, vertices[0].inner,
+					this.faces, this.vertices, tans[1], tans[0], 2);
 
 				var type;
 				for(i = y + 1; i < y + endSegments - 1; ++i)
 				{
-					type = (i - y + 1 < endSegments * 0.5) ? 1 : (i - y === endSegments * 0.5) ? 3 :  (i - y + 1 === endSegments * 0.5) ? 2 : 0;
-					connectCircles(vertices[i + 1].top, vertices[i].top, this.faces, this.vertices, tans[i - y + 1], tans[i - y], type);
+					type = (i - y + 1 < endSegments * 0.5) ? 2 :
+						(i - y === endSegments * 0.5) ? 4 :  (i - y + 1 === endSegments * 0.5) ? 3 : 1;
+					connectCircles(vertices[i + 1].top, vertices[i].top, this.faces,
+						this.vertices, tans[i - y + 1], tans[i - y], type);
 				}
 
-				connectCircles(vertices[0].outer, vertices[y + endSegments - 1].top, this.faces, this.vertices, tans[tans.length - 1], tans[tans.length - 2]);
+				connectCircles(vertices[0].outer, vertices[y + endSegments - 1].top,
+					this.faces, this.vertices, tans[tans.length - 1], tans[tans.length - 2], 1);
 			}
 			if(innerRadiusBottom !== outerRadiusBottom)
 			{
@@ -230,34 +236,45 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 
 				for(i = y + 1; i < y + endSegments - 1; ++i)
 				{
-					tan = -(vertices[ i + 1 ].b_rad - vertices[ i ].b_rad) / (vertices[ i ].height - vertices[ i + 1 ].height);
+					tan = -(vertices[ i + 1 ].b_rad - vertices[ i ].b_rad) /
+						(vertices[ i ].height - vertices[ i + 1 ].height);
 					tans.push(Math.tan((Math.atan(tan) + Math.atan(prevTan)) * 0.5));
 					prevTan = tan;
 				}
-				tans.push(Math.tan((Math.atan(-o_tanTheta) + Math.atan(prevTan)) * 0.5));
+				tans.push(Math.tan((Math.atan(o_tanTheta) + Math.atan(prevTan)) * 0.5));
 				tans.push(o_tanTheta);
 
-				connectCircles(vertices[y].inner, vertices[y + 1].bottom, this.faces, this.vertices, tans[0], tans[1], 1);
+				connectCircles(vertices[y].inner, vertices[y + 1].bottom,
+					this.faces, this.vertices, tans[0], tans[1], 5);
 				
 				for(i = y + 1; i < y + endSegments - 1; ++i)
 				{
-					type = (i - y + 1 < endSegments * 0.5) ? 1 : (i - y === endSegments * 0.5) ? 3 :  (i - y + 1 === endSegments * 0.5) ? 2 : 0;
-					connectCircles(vertices[i].bottom, vertices[i + 1].bottom, this.faces, this.vertices, tans[i - y], tans[i - y + 1], type);
+					type = (i - y + 1 < endSegments * 0.5) ? 5 : (i - y === endSegments * 0.5) ? 7 :
+						(i - y + 1 === endSegments * 0.5) ? 6 : 1;
+					connectCircles(vertices[i].bottom, vertices[i + 1].bottom, this.faces,
+						this.vertices, tans[i - y], tans[i - y + 1], type);
 				}
 
-				connectCircles(vertices[y + endSegments - 1].bottom, vertices[y].outer, this.faces, this.vertices, tans[tans.length - 2], tans[tans.length - 1]);
+				connectCircles(vertices[y + endSegments - 1].bottom, vertices[y].outer,
+					this.faces, this.vertices, tans[tans.length - 2], tans[tans.length - 1], 1);
 			}
 		}
 		else
 		{
 			if(innerRadiusTop !== outerRadiusTop)
 			{
-				connectCircles(vertices[0].outer, vertices[0].inner, this.faces);
+				var tan = 0;
+				if(i_heightHalf !== o_heightHalf)
+					tan = (outerRadiusTop - innerRadiusTop) / (i_heightHalf - o_heightHalf);
+				connectCircles(vertices[0].outer, vertices[0].inner, this.faces, this.vertices, tan ? tan : 10000);
 			}
 
 			if(innerRadiusBottom !== outerRadiusBottom)
 			{
-				connectCircles(vertices[y].inner, vertices[y].outer, this.faces);
+				var tan = 0;
+				if(i_heightHalf !== o_heightHalf)
+					tan = -(outerRadiusBottom - innerRadiusBottom) / (i_heightHalf - o_heightHalf);
+				connectCircles(vertices[y].inner, vertices[y].outer, this.faces, this.vertices, tan ? tan : -10000);
 			}
 		}
 	}
@@ -307,9 +324,12 @@ TubeGeometry = function ( innerRadiusTop, innerRadiusBottom, outerRadiusTop, out
 			}
 
 			this.faces.push( new THREE.Face3( tv1, vertices[0].outer[0], vertices[ y ].top[0] ) );
-			this.faces.push( new THREE.Face3( tv2, vertices[ y ].top[segmentsX], vertices[0].outer[segmentsX] ) );
-			this.faces.push( new THREE.Face3( bv1, vertices[ y ].bottom[0], vertices[segmentsY].outer[0] ) );
-			this.faces.push( new THREE.Face3( bv2, vertices[ segmentsY ].outer[segmentsX], vertices[ y ].bottom[segmentsX] ) );
+			this.faces.push( new THREE.Face3( tv2, vertices[ y ].top[segmentsX],
+				vertices[0].outer[segmentsX] ) );
+			this.faces.push( new THREE.Face3( bv1, vertices[ y ].bottom[0],
+				vertices[segmentsY].outer[0] ) );
+			this.faces.push( new THREE.Face3( bv2, vertices[ segmentsY ].outer[segmentsX],
+				vertices[ y ].bottom[segmentsX] ) );
 		}
 	}
 
@@ -328,41 +348,71 @@ function connectCircles(verticesRow1, verticesRow2, faces, vertices, tan1, tan2,
 		var v3 = verticesRow2[ x ];
 		var v4 = verticesRow1[ x ];
 
-		if(vertices)
+		var vn1 = vertices[verticesRow1[ x + 1 ]].clone();
+		var vn2 = vertices[verticesRow2[ x + 1 ]].clone();
+		var vn3 = vertices[verticesRow2[ x ]].clone();
+		var vn4 = vertices[verticesRow1[ x ]].clone();
+
+		//in case when normals calculation is required
+		if(type)
 		{
-			var vn1 = vertices[verticesRow1[ x + 1 ]].clone();
-			var vn2 = vertices[verticesRow2[ x + 1 ]].clone();
-			var vn3 = vertices[verticesRow2[ x ]].clone();
-			var vn4 = vertices[verticesRow1[ x ]].clone();
 			vn1.setY( Math.sqrt( vn1.x * vn1.x + vn1.z * vn1.z ) * tan1 ).normalize();
 			vn2.setY( Math.sqrt( vn2.x * vn2.x + vn2.z * vn2.z ) * tan2 ).normalize();
 			vn3.setY( Math.sqrt( vn3.x * vn3.x + vn3.z * vn3.z ) * tan2 ).normalize();
 			vn4.setY( Math.sqrt( vn4.x * vn4.x + vn4.z * vn4.z ) * tan1 ).normalize();
-			if(type === 1)
+			switch(type)
 			{
-				vn1.negate();
-				vn2.negate();
-				vn3.negate();
-				vn4.negate();
-			}
-			else if(type === 2)
-			{
-				vn2.negate();
-				vn3.negate();
-				vn1 = new THREE.Vector3( 0, 1, 0 );
-				vn4 = new THREE.Vector3( 0, 1, 0 );
-			}
-			else
-				if(type === 3)
-				{
+				case 2:
+					vn1.negate();
+					vn2.negate();
+					vn3.negate();
+					vn4.negate();
+				break;
+
+				case 3:
+					vn2.negate();
+					vn3.negate();
+					vn1 = new THREE.Vector3( 0, 1, 0 );
+					vn4 = new THREE.Vector3( 0, 1, 0 );
+				break;
+
+				case 4:
 					vn2 = new THREE.Vector3( 0, 1, 0 );
 					vn3 = new THREE.Vector3( 0, 1, 0 );
-				}
+				break;
+
+				case 5:
+					vn1.negate();
+					vn2.negate();
+					vn3.negate();
+					vn4.negate();
+				break;
+
+				case 6:
+					vn1.negate();
+					vn4.negate();
+					vn2 = new THREE.Vector3( 0, -1, 0 );
+					vn3 = new THREE.Vector3( 0, -1, 0 );
+				break;
+
+				case 7:
+					vn1 = new THREE.Vector3( 0, -1, 0 );
+					vn4 = new THREE.Vector3( 0, -1, 0 );
+				break;
+			}
+
 
 			faces.push( new THREE.Face4( v1, v2, v3, v4, [ vn1, vn2 , vn3, vn4 ] ) );
 		}
 		else
-			faces.push( new THREE.Face4( v1, v2, v3, v4 ) );
+		{
+			vn1.setY( Math.sqrt( vn1.x * vn1.x + vn1.z * vn1.z ) * tan1 ).normalize();
+			vn2.setY( Math.sqrt( vn2.x * vn2.x + vn2.z * vn2.z ) * tan1 ).normalize();
+			vn3.setY( Math.sqrt( vn3.x * vn3.x + vn3.z * vn3.z ) * tan1 ).normalize();
+			vn4.setY( Math.sqrt( vn4.x * vn4.x + vn4.z * vn4.z ) * tan1 ).normalize();
+		}
+
+		faces.push( new THREE.Face4( v1, v2, v3, v4, [ vn1, vn2 , vn3, vn4 ] ) );
 	}
 }
 

@@ -75,7 +75,7 @@ function createTube()
 function fillScene() 
 {
 	scene = new THREE.Scene();
-	scene.fog = new THREE.Fog( 0x808080, 2000, 4000 );
+	scene.fog = new THREE.Fog( 0x4aa9be, 2000, 4000 );
 
 	// LIGHTS
 	var ambientLight = new THREE.AmbientLight( 0x222222 );
